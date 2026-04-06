@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigPrompt - AI Prompt Generator for Freelancers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --primary-light: #e0f2fe;
+            --secondary: #10b981;
+            --secondary-light: #d1fae5;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #f0f9ff 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* API Key Section */
+        .api-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .api-input-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .api-input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .api-input-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .api-input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .api-status {
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .api-status.connected {
+            background: var(--secondary-light);
+            color: #047857;
+        }
+
+        .api-status.disconnected {
+            background: #fee2e2;
+            color: var(--error);
+        }
+
+        /* Main Form */
+        .form-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        /* Category Selection */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .category-btn {
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .category-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Text Input */
+        textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            flex: 1;
+            min-width: 200px;
+            justify-content: center;
+            font-size: 15px;
+            padding: 14px 28px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-copy {
+            background: var(--secondary-light);
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+
+        .btn-copy:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-copy.copied {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .results-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .prompt-output {
+            background: #f1f5f9;
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            word-break: break-word;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+
+        /* Loading State */
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid var(--error);
+        }
+
+        .alert-success {
+            background: var(--secondary-light);
+            color: #047857;
+            border-left: 4px solid var(--secondary);
+        }
+
+        /* Ad Placeholders */
+        .ad-space {
+            background: linear-gradient(135deg, #f0f9ff 0%, #f5f3ff 100%);
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .ad-space.top {
+            margin-bottom: 30px;
+        }
+
+        .ad-space.sidebar {
+            position: sticky;
+            top: 20px;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 24px 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: auto;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            .category-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-primary {
+                min-width: auto;
+            }
+
+            .api-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .api-input-group input {
+                width: 100%;
+            }
+
+            .api-status {
+                text-align: center;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Utility */
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-4 {
+            margin-top: 24px;
+        }
+
+        .gap-2 {
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">GigPrompt</div>
+            <p class="tagline">AI-Powered Prompts for Freelancers & Side Hustlers</p>
+        </header>
+
+        <!-- Ad Space - Top -->
+        <div class="ad-space top">
+            <!-- Google AdSense will be inserted here -->
+            <p>Advertisement</p>
+        </div>
+
+        <!-- API Key Input -->
+        <div class="api-section">
+            <div class="api-input-group">
+                <label for="apiKey">Anthropic API Key</label>
+                <input
+                    type="password"
+                    id="apiKey"
+                    placeholder="sk-ant-..."
+                    autocomplete="off"
+                >
+            </div>
+            <div class="api-status disconnected" id="apiStatus">
+                ⚠️ No API Key
+            </div>
+        </div>
+
+        <!-- Alert -->
+        <div class="alert alert-error" id="errorAlert"></div>
+        <div class="alert alert-success" id="successAlert"></div>
+
+        <!-- Main Form -->
+        <div class="form-card">
+            <form id="promptForm">
+                <!-- Category Selection -->
+                <div class="form-group">
+                    <label>Choose Category</label>
+                    <div class="category-grid">
+                        <button type="button" class="category-btn active" data-category="sns-post">
+                            📱 SNS Post
+                        </button>
+                        <button type="button" class="category-btn" data-category="blog">
+                            📝 Blog Post
+                        </button>
+                        <button type="button" class="category-btn" data-category="email">
+                            ✉️ Email
+                        </button>
+                        <button type="button" class="category-btn" data-category="pitch">
+                            💼 Freelance Pitch
+                        </button>
+                        <button type="button" class="category-btn" data-category="product">
+                            🛍️ Product Description
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input Field -->
+                <div class="form-group">
+                    <label for="purpose">What do you need a prompt for?</label>
+                    <textarea
+                        id="purpose"
+                        placeholder="Example: I want to create an engaging Instagram post about my new web design service that targets small businesses looking for affordable websites..."
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">
+                        <span>✨ Generate Prompt</span>
+                    </button>
+                    <a href="https://gumroad.com" class="btn-premium" target="_blank" rel="noopener noreferrer">
+                        ⭐ Get Premium Prompts
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <div class="results-title">✨ Your Generated Prompt</div>
+                <button class="btn-copy" id="copyBtn">📋 Copy</button>
+            </div>
+            <div class="prompt-output" id="promptOutput"></div>
+        </div>
+
+        <!-- Ad Space - Sidebar -->
+        <div class="ad-space sidebar">
+            <p>Advertisement</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 GigPrompt • AI Prompt Generator for Freelancers</p>
+        <p style="margin-top: 8px; font-size: 12px;">
+            <a href="#">Privacy Policy</a> •
+            <a href="#">Terms of Service</a> •
+            <a href="#">Contact</a>
+        </p>
+    </footer>
+
+    <script>
+        // State
+        let selectedCategory = 'sns-post';
+        let apiKey = '';
+        let generatedPrompt = '';
+
+        // DOM Elements
+        const apiKeyInput = document.getElementById('apiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const purposeInput = document.getElementById('purpose');
+        const promptForm = document.getElementById('promptForm');
+        const resultsSection = document.getElementById('resultsSection');
+        const promptOutput = document.getElementById('promptOutput');
+        const copyBtn = document.getElementById('copyBtn');
+        const errorAlert = document.getElementById('errorAlert');
+        const successAlert = document.getElementById('successAlert');
+
+        // Category descriptions for prompt engineering
+        const categoryPrompts = {
+            'sns-post': 'Create an engaging social media post prompt',
+            'blog': 'Create a blog post outline or content prompt',
+            'email': 'Create an email marketing prompt',
+            'pitch': 'Create a freelance pitch or proposal prompt',
+            'product': 'Create a product listing or description prompt'
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Try to load API key from localStorage
+            const savedApiKey = localStorage.getItem('gigprompt_api_key');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+                apiKey = savedApiKey;
+                updateApiStatus(true);
+            }
+
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // API Key input
+            apiKeyInput.addEventListener('input', (e) => {
+                apiKey = e.target.value;
+                if (apiKey) {
+                    localStorage.setItem('gigprompt_api_key', apiKey);
+                    updateApiStatus(true);
+                } else {
+                    localStorage.removeItem('gigprompt_api_key');
+                    updateApiStatus(false);
+                }
+            });
+
+            // Category selection
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedCategory = btn.dataset.category;
+                });
+            });
+
+            // Form submission
+            promptForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await generatePrompt();
+            });
+
+            // Copy button
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(generatedPrompt);
+                    copyBtn.classList.add('copied');
+                    copyBtn.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        copyBtn.classList.remove('copied');
+                        copyBtn.textContent = '📋 Copy';
+                    }, 2000);
+                    showSuccess('Prompt copied to clipboard!');
+                } catch (err) {
+                    showError('Failed to copy prompt');
+                }
+            });
+        }
+
+        function updateApiStatus(connected) {
+            if (connected) {
+                apiStatus.classList.remove('disconnected');
+                apiStatus.classList.add('connected');
+                apiStatus.textContent = '✓ Connected';
+            } else {
+                apiStatus.classList.remove('connected');
+                apiStatus.classList.add('disconnected');
+                apiStatus.textContent = '⚠️ No API Key';
+            }
+        }
+
+        async function generatePrompt() {
+            if (!apiKey) {
+                showError('Please enter your Anthropic API key to continue');
+                return;
+            }
+
+            const purpose = purposeInput.value.trim();
+            if (!purpose) {
+                showError('Please describe what you need');
+                return;
+            }
+
+            const submitBtn = promptForm.querySelector('.btn-primary');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"><span class="spinner"></span> Generating...</span>';
+
+            try {
+                const message = await callClaudeAPI(purpose, selectedCategory);
+                generatedPrompt = message;
+                promptOutput.textContent = message;
+                resultsSection.classList.add('active');
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message || 'Failed to generate prompt. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+
+        async function callClaudeAPI(purpose, category) {
+            // ローカルテスト用: フロントエンド直接呼び出し
+            // 本番（Vercel）では /api/generate を使用
+            const apiEndpoint = window.location.hostname === 'localhost'
+                ? '/api/generate'
+                : '/api/generate';
+
+            try {
+                const response = await fetch(apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        purpose,
+                        category,
+                        apiKey
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    if (response.status === 401) {
+                        throw new Error('Invalid API key. Please check and try again.');
+                    } else if (response.status === 429) {
+                        throw new Error('Rate limited. Please wait a moment and try again.');
+                    } else {
+                        throw new Error(errorData.error || 'API request failed');
+                    }
+                }
+
+                const data = await response.json();
+                if (data.prompt) {
+                    return data.prompt;
+                } else {
+                    throw new Error(data.error || 'Unexpected API response format');
+                }
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        function showError(message) {
+            errorAlert.textContent = '❌ ' + message;
+            errorAlert.classList.add('show');
+            setTimeout(() => {
+                errorAlert.classList.remove('show');
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successAlert.textContent = '✓ ' + message;
+            successAlert.classList.add('show');
+            setTimeout(() => {
+                successAlert.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
